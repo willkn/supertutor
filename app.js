@@ -30,6 +30,7 @@ async function encodeMP3() {
 // Endpoint to generate chat completions
 app.post('/generate-text', async (req, res) => {
   const { text } = req.body;
+  console.log("input:", text);
 
   if (!text) {
     return res.status(400).json({ error: 'Text is required' });
@@ -37,7 +38,7 @@ app.post('/generate-text', async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      messages: [{ role: 'user', content: text}, {role: 'system', content: 'respond in less than 50 words'}],
+      messages: [{ role: 'user', content: text}, {role: 'system', content: 'you are an esteemed mathematics professor teaching an undergrad student, all responses must give an example and an explanation of the example (go through the example with the student). stay under 200 words'}], // without the 200 words is also a strong prompt!
       model: 'gpt-4o',
     });
 
@@ -45,7 +46,7 @@ app.post('/generate-text', async (req, res) => {
 
     const mp3 = await openai.audio.speech.create({
       model: 'tts-1',
-      voice: 'alloy',
+      voice: 'fable',
       input: generatedText,
     });
 
@@ -55,6 +56,8 @@ app.post('/generate-text', async (req, res) => {
 
     // Encode the MP3 file to Base64
     const mp3Base64 = await encodeMP3();
+
+    console.log(generatedText);
 
     // Send both the generated text and the Base64-encoded MP3 as response
     res.json({ generatedText, mp3: mp3Base64 });
